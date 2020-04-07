@@ -1,4 +1,5 @@
 # This is a placeholder README to show a preview of the GUI
+
 ## will be updated when the project is more substantial
 
 ![GUIPreview](/resources/GUIPreview.png)
