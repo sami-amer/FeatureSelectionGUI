@@ -12,7 +12,8 @@ def load_labels(f):
 
 def load_features(f):
     features=[]
-    
+
 
 if __name__ == "__main__":
     # print(load_labels('resources/wellness_nonverbal_condition_lable.csv'))
+    pass
