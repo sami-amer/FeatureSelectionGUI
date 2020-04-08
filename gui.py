@@ -6,12 +6,13 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-
+import main
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtGui import QIcon
 from pathlib import Path
+
 
 class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
@@ -30,19 +31,25 @@ class Ui_MainWindow(QWidget):
         self.dataFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.dataFrame.setObjectName("dataFrame")
 
-        #browse for the feature file BUTTON
+        # browse for the feature file BUTTON
         self.browseFeature_button = QtWidgets.QPushButton(self.dataFrame)
         self.browseFeature_button.setGeometry(QtCore.QRect(290, 20, 75, 23))
         self.browseFeature_button.setObjectName("browseFeature_button")
-        self.browseFeature_button.setToolTip('Choose Feature File')
+        self.browseFeature_button.setToolTip("Choose Feature File")
         self.browseFeature_button.clicked.connect(self.on_click_browse_feature)
+        # sets values for features and feature length so they can be checked before they are set
+        self.featuresLength = ""
+        self.features = []
 
-        #browse for the label file BUTTON
+        # browse for the label file BUTTON
         self.browseLabel_button = QtWidgets.QPushButton(self.dataFrame)
         self.browseLabel_button.setGeometry(QtCore.QRect(620, 20, 75, 23))
         self.browseLabel_button.setObjectName("browseLabel_button")
-        self.browseLabel_button.setToolTip('Choose Label File')
+        self.browseLabel_button.setToolTip("Choose Label File")
         self.browseLabel_button.clicked.connect(self.on_click_browse_label)
+        # sets values for labels and label leanght so they can be checked before they are set
+        self.labelsLength = ""
+        self.labels = []
 
         self.featureFile_label = QtWidgets.QLabel(self.dataFrame)
         self.featureFile_label.setGeometry(QtCore.QRect(40, 20, 61, 16))
@@ -121,7 +128,7 @@ class Ui_MainWindow(QWidget):
         self.top_radiobutton = QtWidgets.QRadioButton(self.frame)
         self.top_radiobutton.setGeometry(QtCore.QRect(500, 50, 82, 17))
         self.top_radiobutton.setObjectName("top_radiobutton")
-        
+
         self.log_radiobutton = QtWidgets.QRadioButton(self.frame)
         self.log_radiobutton.setGeometry(QtCore.QRect(500, 70, 82, 17))
         self.log_radiobutton.setObjectName("log_radiobutton")
@@ -140,7 +147,9 @@ class Ui_MainWindow(QWidget):
         self.trainingTestingSplit_lineedit = QtWidgets.QLineEdit(self.frame)
         self.trainingTestingSplit_lineedit.setGeometry(QtCore.QRect(250, 50, 113, 20))
         self.trainingTestingSplit_lineedit.setText("")
-        self.trainingTestingSplit_lineedit.setObjectName("trainingTestingSplit_lineedit")
+        self.trainingTestingSplit_lineedit.setObjectName(
+            "trainingTestingSplit_lineedit"
+        )
 
         self.Output = QtWidgets.QWidget(self.centralwidget)
         self.Output.setGeometry(QtCore.QRect(30, 700, 741, 121))
@@ -163,16 +172,16 @@ class Ui_MainWindow(QWidget):
         self.run_button = QtWidgets.QPushButton(self.frame_2)
         self.run_button.setGeometry(QtCore.QRect(510, 90, 75, 23))
         self.run_button.setObjectName("run_button")
-        
+
         self.runAndSave_button = QtWidgets.QPushButton(self.frame_2)
         self.runAndSave_button.setGeometry(QtCore.QRect(610, 90, 81, 23))
         self.runAndSave_button.setObjectName("runAndSave_button")
-        
+
         # Save output path BUTTON
         self.outputBrowse_button = QtWidgets.QPushButton(self.frame_2)
         self.outputBrowse_button.setGeometry(QtCore.QRect(50, 90, 75, 23))
         self.outputBrowse_button.setObjectName("outputBrowse_button")
-        self.outputBrowse_button.setToolTip('Choose Output')
+        self.outputBrowse_button.setToolTip("Choose Output")
         self.outputBrowse_button.clicked.connect(self.on_click_save_output)
 
         # output path of save output here LINE EDIT
@@ -188,30 +197,82 @@ class Ui_MainWindow(QWidget):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def on_click_browse_feature(self): #feature file button click
+    def on_click_browse_feature(self):  # feature file button click
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        featureFilePath, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Text File *.txt", options=options)
-        if featureFilePath:
-            self.featureFile_lineedit.insert(featureFilePath)
-        #TODO insert loading of feature file
-    
-    def on_click_browse_label(self): #label file button click
+        self.featureFilePath, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "Comma Seperated Values (*.csv)",
+            options=options,
+        )
+        self.output_textbrowser.insertPlainText("Loading Features File...\n")
+        if self.featureFilePath:
+            self.featureFile_lineedit.insert(self.featureFilePath)
+        self.features, self.featuresLength = main.load_features(self.featureFilePath)
+        if self.labels:  # Checks to see if a label file has been selected yet
+            if (
+                self.labelsLength != self.featuresLength
+            ):  # makes sure the lenghts of the file are equal
+                self.output_textbrowser.insertPlainText(
+                    "WARNING: Feature File and Label File lengths do not match\n"
+                )
+                self.output_textbrowser.insertPlainText(
+                    str(self.featuresLength)
+                    + " is not equal to "
+                    + str(self.labelsLength)
+                    + "\n"
+                )
+
+            else:
+                self.output_textbrowser.insertPlainText("Loading Features Successful\n")
+        else:
+            self.output_textbrowser.insertPlainText("Loading Features Successful\n")
+
+    def on_click_browse_label(self):  # label file button click
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        labelFilePath, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Text File (*.txt)", options=options)
-        if labelFilePath:
-            self.labelFile_lineedit.insert(labelFilePath)
-        #TODO insert loading of label file
-    
-    def on_click_save_output(self): #output button click
+        self.labelFilePath, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "Comma Seperated Values (*.csv)",
+            options=options,
+        )
+        self.output_textbrowser.insertPlainText("Loading Label File...\n")
+        if self.labelFilePath:
+            self.labelFile_lineedit.insert(self.labelFilePath)
+        self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
+        if self.features:
+            if self.featuresLength != self.labelsLength:
+                self.output_textbrowser.insertPlainText(
+                    "WARNING: Labels and Feature File lengths do not match\n"
+                )
+                self.output_textbrowser.insertPlainText(
+                    str(self.labelsLength)
+                    + " is not equal to "
+                    + str(self.featuresLength)
+                    + "\n"
+                )
+            else:
+                self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
+        else:
+            self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
+
+    def on_click_save_output(self):  # output button click
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        outputPath, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","",";Text Files (*.txt)", options=options)
+        outputPath, _ = QFileDialog.getSaveFileName(
+            self,
+            "QFileDialog.getSaveFileName()",
+            "",
+            ";Text Files (*.txt)",
+            options=options,
+        )
         if outputPath:
             self.browseOutput_lineedit.insert(outputPath)
-        #TODO insert saving of output file
-
+        # TODO insert saving of output file
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -221,12 +282,18 @@ class Ui_MainWindow(QWidget):
         self.featureFile_label.setText(_translate("MainWindow", "Feature File"))
         self.labelFile_label.setText(_translate("MainWindow", "Label File"))
         self.data_label.setText(_translate("MainWindow", "Data"))
-        self.featureSelection_label.setText(_translate("MainWindow", " Feature Selection"))
+        self.featureSelection_label.setText(
+            _translate("MainWindow", " Feature Selection")
+        )
         self.analysis_label.setText(_translate("MainWindow", "Analysis"))
-        self.crossvalidation_checkbox.setText(_translate("MainWindow", "Cross Validation"))
+        self.crossvalidation_checkbox.setText(
+            _translate("MainWindow", "Cross Validation")
+        )
         self.folds_label.setText(_translate("MainWindow", "folds"))
         self.stratified_checkbox.setText(_translate("MainWindow", "Stratified"))
-        self.numOfSelectFunc_label.setText(_translate("MainWindow", "# of select functions"))
+        self.numOfSelectFunc_label.setText(
+            _translate("MainWindow", "# of select functions")
+        )
         self.precent_radiobutton.setText(_translate("MainWindow", "%"))
         self.top_radiobutton.setText(_translate("MainWindow", "Top"))
         self.log_radiobutton.setText(_translate("MainWindow", "Log"))
@@ -234,15 +301,17 @@ class Ui_MainWindow(QWidget):
         self.run_button.setText(_translate("MainWindow", "Run"))
         self.runAndSave_button.setText(_translate("MainWindow", "Run And Save"))
         self.outputBrowse_button.setText(_translate("MainWindow", "Browse"))
-        self.trainingTestingSplit_label.setText(_translate("MainWindow", "(Training/Testing) Split"))
+        self.trainingTestingSplit_label.setText(
+            _translate("MainWindow", "(Training/Testing) Split")
+        )
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-
