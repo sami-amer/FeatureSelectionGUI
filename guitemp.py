@@ -6,21 +6,24 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import main
+import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
+from PyQt5.QtGui import QIcon
+from pathlib import Path
 
-class Ui_MainWindow(object):
+class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(786, 632)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        
         self.Data = QtWidgets.QWidget(self.centralwidget)
         self.Data.setEnabled(True)
         self.Data.setGeometry(QtCore.QRect(0, 20, 791, 61))
         self.Data.setAutoFillBackground(False)
         self.Data.setObjectName("Data")
-        
         self.dataFrame = QtWidgets.QFrame(self.Data)
         self.dataFrame.setGeometry(QtCore.QRect(30, 0, 741, 61))
         self.dataFrame.setFrameShape(QtWidgets.QFrame.Box)
@@ -31,6 +34,8 @@ class Ui_MainWindow(object):
         self.browseFeature_button = QtWidgets.QPushButton(self.dataFrame)
         self.browseFeature_button.setGeometry(QtCore.QRect(290, 20, 75, 23))
         self.browseFeature_button.setObjectName("browseFeature_button")
+        self.browseFeature_button.setToolTip("Choose Feature File")
+        self.browseFeature_button.clicked.connect(self.on_click_browse_feature)
         # sets values for features and feature length so they can be checked before they are set
         self.featuresLength = ""
         self.features = []
@@ -38,6 +43,11 @@ class Ui_MainWindow(object):
         self.browseLabel_button = QtWidgets.QPushButton(self.dataFrame)
         self.browseLabel_button.setGeometry(QtCore.QRect(620, 20, 75, 23))
         self.browseLabel_button.setObjectName("browseLabel_button")
+        self.browseLabel_button.setToolTip("Choose Label File")
+        self.browseLabel_button.clicked.connect(self.on_click_browse_label)
+        # sets values for labels and label leanght so they can be checked before they are set
+        self.labelsLength = ""
+        self.labels = []
 
         self.featureFile_label = QtWidgets.QLabel(self.dataFrame)
         self.featureFile_label.setGeometry(QtCore.QRect(40, 20, 61, 16))
@@ -338,10 +348,13 @@ class Ui_MainWindow(object):
         self.outputBrowse_button = QtWidgets.QPushButton(self.frame_2)
         self.outputBrowse_button.setGeometry(QtCore.QRect(60, 10, 75, 23))
         self.outputBrowse_button.setObjectName("outputBrowse_button")
+        self.outputBrowse_button.setToolTip("Choose Output")
+        self.outputBrowse_button.clicked.connect(self.on_click_save_output)
         
         self.browseOutput_lineedit = QtWidgets.QLineEdit(self.frame_2)
         self.browseOutput_lineedit.setGeometry(QtCore.QRect(25, 40, 113, 20))
         self.browseOutput_lineedit.setObjectName("browseOutput_lineedit")
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -349,6 +362,84 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+ 
+    def on_click_browse_feature(self):  # feature file button click
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.featureFilePath, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "Comma Seperated Values (*.csv)",
+            options=options,
+        )
+        self.output_textbrowser.insertPlainText("Loading Features File...\n")
+        if self.featureFilePath:
+            self.featureFile_lineedit.insert(self.featureFilePath)
+        self.features, self.featuresLength = main.load_features(self.featureFilePath)
+        if self.labels:  # Checks to see if a label file has been selected yet
+            if (
+                self.labelsLength != self.featuresLength
+            ):  # makes sure the lenghts of the file are equal
+                self.output_textbrowser.insertPlainText(
+                    "WARNING: Feature File and Label File lengths do not match\n"
+                )
+                self.output_textbrowser.insertPlainText(
+                    str(self.featuresLength)
+                    + " is not equal to "
+                    + str(self.labelsLength)
+                    + "\n"
+                )
+
+            else:
+                self.output_textbrowser.insertPlainText("Loading Features Successful\n")
+        else:
+            self.output_textbrowser.insertPlainText("Loading Features Successful\n")
+
+    def on_click_browse_label(self):  # label file button click
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.labelFilePath, _ = QFileDialog.getOpenFileName(
+            self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "Comma Seperated Values (*.csv)",
+            options=options,
+        )
+        self.output_textbrowser.insertPlainText("Loading Label File...\n")
+        if self.labelFilePath:
+            self.labelFile_lineedit.insert(self.labelFilePath)
+        self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
+        if self.features:
+            if self.featuresLength != self.labelsLength:
+                self.output_textbrowser.insertPlainText(
+                    "WARNING: Labels and Feature File lengths do not match\n"
+                )
+                self.output_textbrowser.insertPlainText(
+                    str(self.labelsLength)
+                    + " is not equal to "
+                    + str(self.featuresLength)
+                    + "\n"
+                )
+            else:
+                self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
+        else:
+            self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
+
+    def on_click_save_output(self):  # output button click
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        outputPath, _ = QFileDialog.getSaveFileName(
+            self,
+            "QFileDialog.getSaveFileName()",
+            "",
+            ";Text Files (*.txt)",
+            options=options,
+        )
+        if outputPath:
+            self.browseOutput_lineedit.insert(outputPath)
+        # TODO insert saving of output file
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
