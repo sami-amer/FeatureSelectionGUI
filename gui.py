@@ -16,7 +16,7 @@ import pandas as pd
 
 class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("Feature Selection GUI")
         MainWindow.resize(786, 632)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -370,35 +370,35 @@ class Ui_MainWindow(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         self.featureFilePath, _ = QFileDialog.getOpenFileName(
-            self,
+            self, # just note, this self needs to refer to a subclass of QWidget
             "QFileDialog.getOpenFileName()",
             "",
-            "Comma Seperated Values (*.csv)",
+            "Comma Seperated Values (*.csv)", # this restricts what files you are allowed to select
             options=options,
         )
-        self.output_textbrowser.insertPlainText("Loading Features File...\n")
-        if self.featureFilePath:
+        if self.featureFilePath: # This outputs the path for reference
+            self.output_textbrowser.insertPlainText("Loading Features File...\n") # prints to the output box
             self.featureFile_lineedit.insert(self.featureFilePath)
-        self.features, self.featuresLength = main.load_features(self.featureFilePath)
-        self.featuresLoaded = True
-        if self.labelsLoaded:  # Checks to see if a label file has been selected yet
-            if (
-                self.labelsLength != self.featuresLength - 1
-            ):  # makes sure the lenghts of the file are equal
-                self.output_textbrowser.insertPlainText(
-                    "WARNING: Feature File and Label File lengths do not match\n"
-                )
-                self.output_textbrowser.insertPlainText(
-                    str(self.featuresLength)
-                    + " is not equal to "
-                    + str(self.labelsLength)
-                    + "\n"
-                )
+            self.features, self.featuresLength = main.load_features(self.featureFilePath)
+            self.featuresLoaded = True
+            if self.labelsLoaded:  # Checks to see if a label file has been selected yet
+                if (
+                    self.labelsLength != self.featuresLength - 1
+                ):  # makes sure the lenghts of the file are equal
+                    self.output_textbrowser.insertPlainText(
+                        "WARNING: Feature File and Label File lengths do not match\n"
+                    )
+                    self.output_textbrowser.insertPlainText(
+                        str(self.featuresLength)
+                        + " is not equal to "
+                        + str(self.labelsLength)
+                        + "\n"
+                    )
 
+                else:
+                    self.output_textbrowser.insertPlainText("Loading Features Successful\n")
             else:
                 self.output_textbrowser.insertPlainText("Loading Features Successful\n")
-        else:
-            self.output_textbrowser.insertPlainText("Loading Features Successful\n")
 
     def on_click_browse_label(self):  # label file button click
         options = QFileDialog.Options()
@@ -410,26 +410,27 @@ class Ui_MainWindow(QWidget):
             "Comma Seperated Values (*.csv)",
             options=options,
         )
-        self.output_textbrowser.insertPlainText("Loading Label File...\n")
+
         if self.labelFilePath:
+            self.output_textbrowser.insertPlainText("Loading Label File...\n")
             self.labelFile_lineedit.insert(self.labelFilePath)
-        self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
-        self.labelsLoaded = True
-        if self.featuresLoaded:
-            if self.featuresLength - 1 != self.labelsLength:
-                self.output_textbrowser.insertPlainText(
-                    "WARNING: Labels and Feature File lengths do not match\n"
-                )
-                self.output_textbrowser.insertPlainText(
-                    str(self.labelsLength)
-                    + " is not equal to "
-                    + str(self.featuresLength)
-                    + "\n"
-                )
+            self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
+            self.labelsLoaded = True
+            if self.featuresLoaded:
+                if self.featuresLength - 1 != self.labelsLength:
+                    self.output_textbrowser.insertPlainText(
+                        "WARNING: Labels and Feature File lengths do not match\n"
+                    )
+                    self.output_textbrowser.insertPlainText(
+                        str(self.labelsLength)
+                        + " is not equal to "
+                        + str(self.featuresLength)
+                        + "\n"
+                    )
+                else:
+                    self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
             else:
                 self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
-        else:
-            self.output_textbrowser.insertPlainText("Loading Labels Successful\n")
 
     def on_click_save_output(self):  # output button click
         options = QFileDialog.Options()
@@ -448,7 +449,7 @@ class Ui_MainWindow(QWidget):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Feature Selection GUI"))
         self.browseFeature_button.setText(_translate("MainWindow", "Browse"))
         self.browseLabel_button.setText(_translate("MainWindow", "Browse"))
         self.featureFile_label.setText(_translate("MainWindow", "Feature File"))
