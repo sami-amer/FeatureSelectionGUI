@@ -406,7 +406,6 @@ class Ui_MainWindow(QWidget):
                 if (
                     self.labelsLength
                     != self.featuresLength
-                    - 1  # one is subtracted from the lenght of the features because the first line is titles
                 ):  # makes sure the lenghts of the file are equal
                     self.output_textbrowser.insertPlainText(
                         "WARNING: Feature File and Label File lengths do not match\n"
@@ -442,7 +441,7 @@ class Ui_MainWindow(QWidget):
             self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
             self.labelsLoaded = True
             if self.featuresLoaded:
-                if self.featuresLength - 1 != self.labelsLength:
+                if self.featuresLength != self.labelsLength:
                     self.output_textbrowser.insertPlainText(
                         "WARNING: Labels and Feature File lengths do not match\n"
                     )
