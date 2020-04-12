@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtGui import QIcon
 from pathlib import Path
+import pandas as pd 
 
 class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
@@ -410,7 +411,7 @@ class Ui_MainWindow(QWidget):
         if self.labelFilePath:
             self.labelFile_lineedit.insert(self.labelFilePath)
         self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
-        if self.features:
+        if self.features.all():
             if self.featuresLength != self.labelsLength:
                 self.output_textbrowser.insertPlainText(
                     "WARNING: Labels and Feature File lengths do not match\n"
