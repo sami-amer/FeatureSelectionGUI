@@ -40,6 +40,7 @@ class Ui_MainWindow(QWidget):
         # sets values for features and feature length so they can be checked before they are set
         self.featuresLength = ""
         self.features = []
+        self.featuresLoaded = False
 
         self.browseLabel_button = QtWidgets.QPushButton(self.dataFrame)
         self.browseLabel_button.setGeometry(QtCore.QRect(620, 20, 75, 23))
@@ -49,6 +50,7 @@ class Ui_MainWindow(QWidget):
         # sets values for labels and label leanght so they can be checked before they are set
         self.labelsLength = ""
         self.labels = []
+        self.labelsLoaded = False
 
         self.featureFile_label = QtWidgets.QLabel(self.dataFrame)
         self.featureFile_label.setGeometry(QtCore.QRect(40, 20, 61, 16))
@@ -378,9 +380,10 @@ class Ui_MainWindow(QWidget):
         if self.featureFilePath:
             self.featureFile_lineedit.insert(self.featureFilePath)
         self.features, self.featuresLength = main.load_features(self.featureFilePath)
-        if self.labels:  # Checks to see if a label file has been selected yet
+        self.featuresLoaded = True
+        if self.labelsLoaded:  # Checks to see if a label file has been selected yet
             if (
-                self.labelsLength != self.featuresLength
+                self.labelsLength != self.featuresLength - 1
             ):  # makes sure the lenghts of the file are equal
                 self.output_textbrowser.insertPlainText(
                     "WARNING: Feature File and Label File lengths do not match\n"
@@ -411,8 +414,9 @@ class Ui_MainWindow(QWidget):
         if self.labelFilePath:
             self.labelFile_lineedit.insert(self.labelFilePath)
         self.labels, self.labelsLength = main.load_labels(self.labelFilePath)
-        if self.features.all():
-            if self.featuresLength != self.labelsLength:
+        self.labelsLoaded = True
+        if self.featuresLoaded:
+            if self.featuresLength - 1 != self.labelsLength:
                 self.output_textbrowser.insertPlainText(
                     "WARNING: Labels and Feature File lengths do not match\n"
                 )
