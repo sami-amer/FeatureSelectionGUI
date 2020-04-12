@@ -1,6 +1,7 @@
 # import sklearn
 import csv
-
+import numpy as np
+import pandas 
 
 def load_labels(f):
     labels = []
@@ -32,8 +33,17 @@ def load_features(f):
                 features[feature].append(line[feature])
     return features, length
 
+def run_ccm(features,labels):
+    '''
+    epsilon set to 0.1 until further notice
+    '''
+    type_Y = 'binary'
+    num_features = len(features)
+    epsilon = 0.1
+    return 
+
 
 if __name__ == "__main__":
-    print(load_labels("resources/wellness_nonverbal_condition_lable.csv")[1])
-    print(load_features("resources/wellness_nonverbal_features.csv")[1])
+    # print(load_labels("resources/wellness_nonverbal_condition_lable.csv")[0])
+    # print(load_features("resources/wellness_nonverbal_features.csv")[0][0])
     pass
