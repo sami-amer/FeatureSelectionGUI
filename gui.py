@@ -192,6 +192,8 @@ class Ui_MainWindow(QWidget):
         self.tTest_checkbox = QtWidgets.QCheckBox(self.FSFrame)
         self.tTest_checkbox.setGeometry(QtCore.QRect(605, 175, 70, 17))
         self.tTest_checkbox.setObjectName("tTest_checkbox")
+        self.tTest_checkbox.stateChanged.connect(self.tTest_checkbox_changed) # connects the checkbox to a function to check state
+        self.runTtest = False
 
         self.chiSquare_checkbox = QtWidgets.QCheckBox(self.FSFrame)
         self.chiSquare_checkbox.setGeometry(QtCore.QRect(605, 60, 70, 17))
@@ -297,6 +299,7 @@ class Ui_MainWindow(QWidget):
         self.folds_spinbox = QtWidgets.QSpinBox(self.frame)
         self.folds_spinbox.setGeometry(QtCore.QRect(60, 50, 42, 22))
         self.folds_spinbox.setObjectName("folds_spinbox")
+        self.folds_spinbox.setMaximum(100000000)
 
         self.folds_label = QtWidgets.QLabel(self.frame)
         self.folds_label.setGeometry(QtCore.QRect(110, 50, 61, 21))
@@ -313,21 +316,31 @@ class Ui_MainWindow(QWidget):
         self.precent_radiobutton = QtWidgets.QRadioButton(self.frame)
         self.precent_radiobutton.setGeometry(QtCore.QRect(500, 30, 82, 17))
         self.precent_radiobutton.setObjectName("precent_radiobutton")
+        self.precent_radiobutton.toggled.connect(self.on_click_percent_radio) # connects the radio button to functioon that can check for it
+        self.precent_radiobutton_toggled = False
 
         self.top_radiobutton = QtWidgets.QRadioButton(self.frame)
         self.top_radiobutton.setGeometry(QtCore.QRect(500, 50, 82, 17))
         self.top_radiobutton.setObjectName("top_radiobutton")
+        self.top_radiobutton.toggled.connect(self.on_click_top_radio) # connects the radio button to functioon that can check for it
+        self.top_radiobutton_toggled = False
+        
         self.log_radiobutton = QtWidgets.QRadioButton(self.frame)
         self.log_radiobutton.setGeometry(QtCore.QRect(500, 70, 82, 17))
         self.log_radiobutton.setObjectName("log_radiobutton")
+        #connecter line here
+        self.log_radiobutton_toggled = False
+    
 
         self.percent_spinbox = QtWidgets.QSpinBox(self.frame)
         self.percent_spinbox.setGeometry(QtCore.QRect(540, 30, 41, 16))
         self.percent_spinbox.setObjectName("percent_spinbox")
+        self.percent_spinbox.setMaximum(100)
 
         self.top_spinbox = QtWidgets.QSpinBox(self.frame)
         self.top_spinbox.setGeometry(QtCore.QRect(540, 50, 42, 22))
         self.top_spinbox.setObjectName("top_spinbox")
+        self.top_spinbox.setMaximum(10000000)
 
         self.trainingTestingSplit_label = QtWidgets.QLabel(self.frame)
         self.trainingTestingSplit_label.setGeometry(QtCore.QRect(250, 20, 111, 16))
@@ -338,6 +351,7 @@ class Ui_MainWindow(QWidget):
         self.trainingTestingSplit_lineedit.setObjectName(
             "trainingTestingSplit_lineedit"
         )
+
 
         self.Output = QtWidgets.QWidget(self.centralwidget)
         self.Output.setGeometry(QtCore.QRect(30, 520, 741, 81))
@@ -360,6 +374,8 @@ class Ui_MainWindow(QWidget):
         self.run_button = QtWidgets.QPushButton(self.frame_2)
         self.run_button.setGeometry(QtCore.QRect(580, 10, 75, 23))
         self.run_button.setObjectName("run_button")
+        self.run_button.clicked.connect(self.on_click_run)
+
 
         self.runAndSave_button = QtWidgets.QPushButton(self.frame_2)
         self.runAndSave_button.setGeometry(QtCore.QRect(580, 50, 81, 23))
@@ -471,6 +487,53 @@ class Ui_MainWindow(QWidget):
         if outputPath:
             self.browseOutput_lineedit.insert(outputPath)
         # TODO insert saving of output file
+
+    def tTest_checkbox_changed(self,state):
+        if (QtCore.Qt.Checked == state):
+            self.runTtest = True
+        else:
+            pass
+
+
+    def on_click_run(self):
+        runs = 10
+        if not self.features or not self.labels:
+            self.output_textbrowser.insertPlainText('Please load features and labels first\n')
+            return None
+        if self.trainingTestingSplit_lineedit.text():
+            trainingSplit = self.trainingTestingSplit_lineedit.text()
+            trainingSplit = trainingSplit.split('/')
+            trainingSplit = int(trainingSplit[0])/100
+        if self.precent_radiobutton_toggled:
+            percent = int(self.percent_spinbox.value()) / 100
+            featureSelect = int(percent * self.features.shape[1])
+        if self.top_radiobutton_toggled:
+            featureSelect = int(self.top_spinbox.value())
+        if self.log_radiobutton_toggled:
+            pass
+            #insert code for log
+        folds = self.folds_spinbox.value()
+        if self.runTtest: # in final implementation, will either be read from a file or have some sort of array to parse through and see which ones to run
+            self.output_textbrowser.insertPlainText("running tTest Selection;..")
+            jaccard = main.runTtest(self.features,self.labels,runs,folds,trainingSplit,featureSelect)
+            self.output_textbrowser.insertPlainText(jaccard)
+
+    
+    def on_click_percent_radio(self):
+        radioButton = self.sender()
+        if radioButton.isChecked():
+            self.precent_radiobutton_toggled = True
+            self.top_radiobutton_toggled = False
+            self.log_radiobutton_toggled = False
+
+    def on_click_top_radio(self):
+        radioButton = self.sender()
+        if radioButton.isChecked():
+            self.precent_radiobutton_toggled = False
+            self.top_radiobutton_toggled = True
+            self.log_radiobutton_toggled = False
+            
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

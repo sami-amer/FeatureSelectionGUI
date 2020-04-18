@@ -17,8 +17,8 @@ def load_features(f):
     return features,len(features)
 
 
-def runTtest(features,labels,runs,folds): # add features
-    scores = myTtest.tTest(features,labels,runs,folds)
+def runTtest(features,labels,runs,folds,testSize,featureSel): # add features
+    return myTtest.tTest(features,labels,runs,folds,testSize,featureSel)
 
 
 if __name__ == "__main__":

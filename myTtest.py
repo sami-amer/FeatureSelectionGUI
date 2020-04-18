@@ -10,12 +10,12 @@ from jaccard_stability import jaccard_stability
 
 
 
-def tTest(X,y,runs,ens):
+def tTest(X,y,runs,ens,testSize,featureSel):
     n_samples, n_features = np.shape(X)
     n_labels = np.shape(y)
-    sel_features = int(log(n_features,2)) # edit this for feature selections
+    sel_features = featureSel
     print(sel_features)
-    testSize = 0.2 #this should pull from GUI
+
 
 
     FeatSel = np.zeros((ens, sel_features))
@@ -39,7 +39,7 @@ def tTest(X,y,runs,ens):
 
     # test stability
     JI = jaccard_stability(fea_final)
-    print ('jaccard=', JI)
+    return ('jaccard=', JI)
     np.savetxt('Ttest_fea_final.csv', fea_final, delimiter=',',fmt='%d')
 
 if __name__ == "__main__":
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     y = y.reshape((y.shape[0],))
     runs = 10
     ens = 100 #folds?
-    tTest(X,y,runs,ens)
+    testSize = 0.2 #this should pull from GUI
