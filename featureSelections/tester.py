@@ -1,6 +1,6 @@
 import pandas as pd 
 import tensorflow as tf
-import ccm
+import myTtest
 import numpy as np
 
 features = pd.read_csv(r'resources\wellness_nonverbal_features.csv')
@@ -15,5 +15,4 @@ epsilon = 0.1
 
 Y = Y.reshape((Y.shape[0],)) # makes it a (n,) array
 
-
-print(ccm.ccm(X,Y,numFeatures,type_Y,epsilon))
+myTtest.Ttest(X,Y)

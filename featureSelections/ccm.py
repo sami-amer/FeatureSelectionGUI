@@ -93,7 +93,8 @@ class CCM(object):
 
         # Use Gaussian kernel with automatically chosen sigma.
         if X.shape[0]*X.shape[0]*X.shape[1]*8 < 2**30:
-            sigma = np.median(np.linalg.norm(X[:, None, :] - X[None, :, :], axis=2)) 
+            sigma = np.median(np.linalg.norm(X[:, None, :] - X[None, :, :], axis=2))
+            print(sigma) 
         else:
             # Use Monte Carlo sampling to estimate the median instead of the full tensor, if >1GB.
             nsamples = 2**20
@@ -104,7 +105,7 @@ class CCM(object):
             np.random.set_state(st)
             assert not np.isnan(sigma)
             assert sigma > 0.0
-
+        # print(sigma)
         kernel_X = kernel.GaussianKernel(sigma)
 
         # Transform Y.
