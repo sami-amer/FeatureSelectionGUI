@@ -295,6 +295,8 @@ class Ui_MainWindow(QWidget):
         self.crossvalidation_checkbox = QtWidgets.QCheckBox(self.frame)
         self.crossvalidation_checkbox.setGeometry(QtCore.QRect(40, 30, 101, 17))
         self.crossvalidation_checkbox.setObjectName("crossvalidation_checkbox")
+        self.crossvalidation_checkbox.stateChanged.connect(self.crossvalidation_checkbox_changed)
+        self.crossvalidation = False
 
         self.folds_spinbox = QtWidgets.QSpinBox(self.frame)
         self.folds_spinbox.setGeometry(QtCore.QRect(60, 50, 42, 22))
@@ -488,9 +490,15 @@ class Ui_MainWindow(QWidget):
             self.browseOutput_lineedit.insert(outputPath)
         # TODO insert saving of output file
 
-    def tTest_checkbox_changed(self,state):
+    def tTest_checkbox_changed(self, state):
         if (QtCore.Qt.Checked == state):
             self.runTtest = True
+        else:
+            pass
+
+    def crossvalidation_checkbox_changed(self, state):
+        if (QtCore.Qt.Checked == state):
+            self.crossvalidation = True
         else:
             pass
 
