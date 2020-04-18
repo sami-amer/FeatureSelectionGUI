@@ -5,12 +5,13 @@ from math import log
 from statistics import mean, stdev
 from sklearn.model_selection import train_test_split
 from skfeature.function.statistical_based import t_score
+from sklearn.model_selection import StratifiedShuffleSplit
 from jaccard_stability import jaccard_stability
 
 
 
 
-def tTest(X,y,runs,ens,testSize,featureSel):
+def tTest(X,y,runs,ens,testSize,featureSel, Stratified = False):
     n_samples, n_features = np.shape(X)
     n_labels = np.shape(y)
     sel_features = featureSel
@@ -23,10 +24,13 @@ def tTest(X,y,runs,ens,testSize,featureSel):
     fea_final = np.zeros((runs, sel_features))
     for run in range(runs):
         for en in range(ens):
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=testSize) # train test split code
-
-            # print(Xd_train.shape)
-            # print(y_train.shape)
+            if Stratified:
+                sss = StratifiedShuffleSplit(runs,test_size=testSize)
+                for train_index, test_index in sss.split(X,y):
+                    X_train, X_test = X[train_index], X[test_index]
+                    y_train, y_test = y[train_index], y[test_index]
+            else:
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=testSize) # train test split code
             
             score = t_score.t_score(X_train, y_train)
             # print(score)
@@ -39,8 +43,9 @@ def tTest(X,y,runs,ens,testSize,featureSel):
 
     # test stability
     JI = jaccard_stability(fea_final)
-    return ('jaccard=', JI)
     np.savetxt('Ttest_fea_final.csv', fea_final, delimiter=',',fmt='%d')
+    return ('jaccard=', JI)
+    
 
 if __name__ == "__main__":
     features = pd.read_csv(r'resources\wellness_nonverbal_features.csv')

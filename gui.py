@@ -310,6 +310,8 @@ class Ui_MainWindow(QWidget):
         self.stratified_checkbox = QtWidgets.QCheckBox(self.frame)
         self.stratified_checkbox.setGeometry(QtCore.QRect(60, 80, 70, 17))
         self.stratified_checkbox.setObjectName("stratified_checkbox")
+        self.stratified_checkbox.stateChanged.connect(self.stratified_checkbox_changed)
+        self.stratified = False
 
         self.numOfSelectFunc_label = QtWidgets.QLabel(self.frame)
         self.numOfSelectFunc_label.setGeometry(QtCore.QRect(490, 10, 141, 21))
@@ -490,22 +492,27 @@ class Ui_MainWindow(QWidget):
             self.browseOutput_lineedit.insert(outputPath)
         # TODO insert saving of output file
 
-    def tTest_checkbox_changed(self, state):
+    def tTest_checkbox_changed(self, state): # checks to see if tTest Checkbox Changed
         if (QtCore.Qt.Checked == state):
             self.runTtest = True
         else:
             pass
 
-    def crossvalidation_checkbox_changed(self, state):
+    def crossvalidation_checkbox_changed(self, state):# checks to see if crossvalidation Checkbox Changed
         if (QtCore.Qt.Checked == state):
             self.crossvalidation = True
         else:
             pass
 
+    def stratified_checkbox_changed(self,state):
+        if (QtCore.Qt.Checked == state):
+            self.stratified = True
+        else:
+            pass
 
     def on_click_run(self):
-        runs = 10
-        if not self.features or not self.labels:
+        runs = 10 #not sure where to take this in from
+        if not self.featuresLoaded or not self.labelsLoaded:
             self.output_textbrowser.insertPlainText('Please load features and labels first\n')
             return None
         if self.trainingTestingSplit_lineedit.text():
@@ -521,10 +528,15 @@ class Ui_MainWindow(QWidget):
             pass
             #insert code for log
         folds = self.folds_spinbox.value()
+        if not self.crossvalidation:
+            runs = 1
+            folds = 1
+            #cross validate
         if self.runTtest: # in final implementation, will either be read from a file or have some sort of array to parse through and see which ones to run
-            self.output_textbrowser.insertPlainText("running tTest Selection;..")
-            jaccard = main.runTtest(self.features,self.labels,runs,folds,trainingSplit,featureSelect)
-            self.output_textbrowser.insertPlainText(jaccard)
+            self.output_textbrowser.insertPlainText("running tTest Selection...\n")
+            jaccard = main.runTtest(self.features,self.labels,runs,folds,trainingSplit,featureSelect,self.stratified)
+            self.output_textbrowser.insertPlainText(str(jaccard[0])+str(jaccard[1])+'\n')
+
 
     
     def on_click_percent_radio(self):
