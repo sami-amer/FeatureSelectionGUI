@@ -2,24 +2,23 @@
 import csv
 import numpy as np
 import pandas as pd
+import myTtest
 
 def load_labels(f):
     labels = pd.read_csv(f)
+    labels = labels.to_numpy()
+    labels = labels.reshape((labels.shape[0],))
     return labels, len(labels)
 
 
 def load_features(f):
     features= pd.read_csv(f)
+    features = features.to_numpy()
     return features,len(features)
 
-def run_ccm(features,labels):
-    '''
-    epsilon set to 0.1 until further notice
-    '''
-    type_Y = 'binary'
-    num_features = len(features)
-    epsilon = 0.1
-    return None
+
+def runTtest(features,labels,runs,folds): # add features
+    scores = myTtest.tTest(features,labels,runs,folds)
 
 
 if __name__ == "__main__":
